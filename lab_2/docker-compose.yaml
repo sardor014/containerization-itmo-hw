@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:14
+    env_file:
+      - .env
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+
+  init_checker:
+    image: alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    command: echo "PostgreSQL is up and running!"
+
+  jupyter:
+    build: .
+    image: my_jupyter_image
+    container_name: my_jupyter
+    ports:
+      - "8080:8000"
+    volumes: 
+      - ./jupyter_data:/jupyter
+    networks:
+      - app_network
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+
+networks:
+  app_network:
+    driver: bridge
