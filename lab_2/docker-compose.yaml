@@ -1,5 +1,6 @@
 services:
   db:
+    container_name: postgres_db
     image: postgres:14
     env_file:
       - .env
@@ -16,6 +17,7 @@ services:
       - app_network
 
   init_checker:
+    container_name: init_checker
     image: alpine
     depends_on:
       db:
@@ -23,9 +25,9 @@ services:
     command: echo "PostgreSQL is up and running!"
 
   jupyter:
+    container_name: my_jupyter
     build: .
     image: my_jupyter_image
-    container_name: my_jupyter
     ports:
       - "8080:8000"
     volumes: 
